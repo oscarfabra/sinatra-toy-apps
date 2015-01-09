@@ -20,13 +20,53 @@
 # use MyMiddleware
 # run MyApp
 
-require 'sinatra/base'
+# require 'sinatra/base'
 
 #Dir.glob('./{helpers,controllers}/*.rb').each { |file| require file }
 
-require './helpers/application_helper'
-require './controllers/application_controller'
-require './controllers/example_controller'
+# require './helpers/application_helper'
+# require './controllers/application_controller'
+# require './controllers/example_controller'
 
-map('/example') { run ExampleController }
-map('/') { run ApplicationController }
+# map('/example') { run ExampleController }
+# map('/') { run ApplicationController }
+
+# require 'sinatra/base'
+
+# app = Sinatra.new do
+#   get('/') { 'Hello World!' }
+# end
+
+# run app
+
+# require 'sinatra/base'
+
+# general_app = Sinatra.new { enable :logging }
+# custom_app = Sinatra.new(general_app) do 
+#   get('/') { 'Hello World!' }
+# end
+
+# run custom_app
+
+require 'sinatra/base'
+
+words = %w[foo bar bazz]
+
+words.each do |word|
+  # Generate a new application for each word.
+  map("/#{word}") { run Sinatra.new { get('/') { word } } }
+end
+
+# Generates a list of the possible links.
+map '/' do
+  app = Sinatra.new do
+    get '/' do
+      list = words.map do |word|
+        "<a href='/#{word}'>#{word}</a>"
+      end
+      list.join("<br>")
+    end
+  end
+
+  run app
+end
