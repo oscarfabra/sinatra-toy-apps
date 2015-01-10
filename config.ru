@@ -20,6 +20,9 @@
 # use MyMiddleware
 # run MyApp
 
+# -----------------------------------------------
+# Architecture test.
+
 # require 'sinatra/base'
 
 #Dir.glob('./{helpers,controllers}/*.rb').each { |file| require file }
@@ -39,6 +42,9 @@
 
 # run app
 
+# -----------------------------------------------
+# Inheritance test.
+
 # require 'sinatra/base'
 
 # general_app = Sinatra.new { enable :logging }
@@ -48,25 +54,58 @@
 
 # run custom_app
 
+# -----------------------------------------------
+# Dynamic subclassing test.
+
+# require 'sinatra/base'
+
+# words = %w[foo bar bazz]
+
+# words.each do |word|
+#   # Generate a new application for each word.
+#   map("/#{word}") { run Sinatra.new { get('/') { word } } }
+# end
+
+# # Generates a list of the possible links.
+# map '/' do
+#   app = Sinatra.new do
+#     get '/' do
+#       list = words.map do |word|
+#         "<a href='/#{word}'>#{word}</a>"
+#       end
+#       list.join("<br>")
+#     end
+#   end
+
+#   run app
+# end
+
+# -----------------------------------------------
+# Chaining classes test.
+
 require 'sinatra/base'
 
-words = %w[foo bar bazz]
+Router = Sinatra.new
 
-words.each do |word|
-  # Generate a new application for each word.
-  map("/#{word}") { run Sinatra.new { get('/') { word } } }
-end
-
-# Generates a list of the possible links.
-map '/' do
-  app = Sinatra.new do
-    get '/' do
-      list = words.map do |word|
-        "<a href='/#{word}'>#{word}</a>"
-      end
-      list.join("<br>")
-    end
+# Automatically picking up subclasses as middleware.
+class ApplicationController < Sinatra::Base
+  def self.inherited(sublass)
+    super
+    Router.use(sublass)
   end
 
-  run app
+  enable :logging
 end
+
+class ExampleController < ApplicationController
+  get('/example') { "Example!" }
+end
+
+# Works with dynamically generated applications, too.
+Sinatra.new ApplicationController do
+  get '/' do
+    "See the <a href='/example'>example</a>."
+  end
+end
+
+Router.run!
