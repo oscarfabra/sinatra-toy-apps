@@ -83,29 +83,111 @@
 # -----------------------------------------------
 # Chaining classes test.
 
+# require 'sinatra/base'
+
+# Router = Sinatra.new
+
+# # Automatically picking up subclasses as middleware.
+# class ApplicationController < Sinatra::Base
+#   def self.inherited(sublass)
+#     super
+#     Router.use(sublass)
+#   end
+
+#   enable :logging
+# end
+
+# class ExampleController < ApplicationController
+#   get('/example') { "Example!" }
+# end
+
+# # Works with dynamically generated applications, too.
+# Sinatra.new ApplicationController do
+#   get '/' do
+#     "See the <a href='/example'>example</a>."
+#   end
+# end
+
+# Router.run!
+
+# -----------------------------------------------
+# Chaining classes with routing.
+
+# require 'sinatra/base'
+# require 'rack/mount'
+
+# class Foo < Sinatra::Base
+#   get('/foo') { 'foo' }
+# end
+
+# class Bar < Sinatra::Base
+#   get('/bar') { 'bar' }
+# end
+
+# Routes = Rack::Mount::RouteSet.new do |set|
+#   set.add_route Foo, :path_info => %r{^/foo$}
+#   set.add_route Bar, :path_info => %r{^/bar$}
+# end
+
+# run Routes
+
+# -----------------------------------------------
+# Routing depending on the verb.
+
+# require 'sinatra/base'
+# require 'rack/mount'
+
+# class Get < Sinatra::Base
+#   get('/') { 'GET!' }
+# end
+
+# class Post < Sinatra::Base
+#   post('/') { 'POST!' }
+# end
+
+# Routes = Rack::Mount::RouteSet.new do |set|
+#   set.add_route Get, :request_method => 'GET'
+#   set.add_route Post, :request_method => 'POST'
+# end
+
+# run Routes
+
+# -----------------------------------------------
+# Using Sinatra as router.
+
+# require 'sinatra/base'
+
+# class Foo < Sinatra::Base
+#   get('/foo') { 'foo' }
+# end
+
+# class Bar < Sinatra::Base
+#   get('/bar') { 'bar' }
+# end
+
+# class Routes < Sinatra::Base
+#   get('/foo') { Foo.call(env) }
+#   get('/bar') { Bar.call(env) }
+# end
+
+# run Routes
+
+# -----------------------------------------------
+# Verb-based routing with Sinatra.
+
 require 'sinatra/base'
 
-Router = Sinatra.new
-
-# Automatically picking up subclasses as middleware.
-class ApplicationController < Sinatra::Base
-  def self.inherited(sublass)
-    super
-    Router.use(sublass)
-  end
-
-  enable :logging
+class Get < Sinatra::Base
+  get('/') { 'GET!' }
 end
 
-class ExampleController < ApplicationController
-  get('/example') { "Example!" }
+class Post < Sinatra::Base
+  post('/') { 'POST!' }
 end
 
-# Works with dynamically generated applications, too.
-Sinatra.new ApplicationController do
-  get '/' do
-    "See the <a href='/example'>example</a>."
-  end
+class Routes < Sinatra::Base
+  get('/') { Get.call(env) }
+  post('/') { Post.call(env) }
 end
 
-Router.run!
+run Routes
